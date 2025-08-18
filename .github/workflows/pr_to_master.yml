@@ -15,22 +15,21 @@ jobs:
   validate-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Enforce branch policy
+      - name: Block direct pushes to master
+        # Ensure the push is made only by GitHub bot, meaning on the merge of a PR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor != 'github-actions[bot]'
         run: |
-          # Block direct pushes to master
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "❌ Direct push to master is not allowed!"
-            exit 1
-          fi
+          echo "❌ Direct push to master is not allowed!"
+          exit 1
 
-          # Enforce PRs to master must come from dev
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "master" ]]; then
-            if [[ "${{ github.head_ref }}" != "dev" ]]; then
-              echo "❌ PRs to master must come from dev!"
-              exit 1
-            else
-              echo "✅ PR from dev to master authorized."
-            fi
+      - name: Enforce PRs to master must come from dev
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
+        run: |
+          if [[ "${{ github.head_ref }}" != "dev" ]]; then
+            echo "❌ PRs to master must come from dev!"
+            exit 1
+          else
+            echo "✅ PR from dev to master authorized."
           fi
 
   #-----------------------------------------------------------------------
