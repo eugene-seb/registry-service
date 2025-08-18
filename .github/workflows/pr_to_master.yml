@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Block direct pushes to master
         # Ensure the push is made only by GitHub bot, meaning on the merge of a PR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor != 'github-actions[bot]'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'github-actions[bot]'
         run: |
           echo "❌ Direct push to master is not allowed!"
           exit 1
